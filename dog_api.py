@@ -41,6 +41,7 @@ def get_all_breeds():
         response.raise_for_status()
         data = response.json()
         return data["message"]
+    
     except requests.exceptions.RequestException:
         print("Error: Could not fetch breed list from API.")
         return {}
@@ -48,19 +49,61 @@ def get_all_breeds():
 def get_random_image(breed):
     """GET request to fetch a random image from a breed."""
     # TODO: Make a request to https://dog.ceo/api/breed/{breed}/images/random
+    try:
+        response = requests.get(f"https://dog.ceo/api/breed/{breed}/images/random")
+        response.raise_for_status()
+        data = response.json()
+        return data["message"]
+
+    except requests.exceptions.RequestException:
+        print("Error: Could not fetch image from API.")
+        return data["message"].json()#image url needed    
     # TODO: Return the image URL or handle errors
     pass
+
+# def get_random_sub_breed_image(breed, sub_breed):
+#     """GET request to fetch a random image from a sub-breed."""
+#     # TODO: Make a request to https://dog.ceo/api/breed/{breed}/{sub_breed}/images/random
+#     try:
+#         response = requests.get(f"https://dog.ceo/api/breed/{breed}/{sub_breed}/images/random")
+#         response.raise_for_status()
+#         data = response.json()
+#         return data[breed]
+
+#     except requests.exceptions.RequestException:
+#         print("Error: Could not fetch image from API.")
+#         return data["message"].json()
+#     # TODO: Return the image URL or handle errors
+#     pass
 
 def get_random_sub_breed_image(breed, sub_breed):
     """GET request to fetch a random image from a sub-breed."""
-    # TODO: Make a request to https://dog.ceo/api/breed/{breed}/{sub_breed}/images/random
-    # TODO: Return the image URL or handle errors
-    pass
+    url = f"https://dog.ceo/api/breed/{breed}/{sub_breed}/images/random"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        #print(data)
+        return data["message"]  # This is the image URL
 
+    except requests.exceptions.RequestException as e:
+        print(f"Error: Could not fetch image from API. Reason: {e}")
+        return None
+
+
+#Printing a dictionary with spacing functionality from Google AI, April, 2025
 def show_breeds(breeds_dict):
     """Prints all available breeds 5 per line."""
     # TODO: Print all breeds (sorted), 5 per line
-    pass
+    sorted_breeds = dict(sorted(breeds_dict.items()))
+    item_count = 0
+
+    for breed in sorted_breeds:
+        print(f"{breed}\t", end=" ")
+        item_count += 1
+        if item_count % 5 == 0:
+            print()
+       
 
 def main():
     while True:
@@ -76,15 +119,48 @@ def main():
             breeds = get_all_breeds()
             show_breeds(breeds)
 
+        #Error code logic for choice #2 coded with help from ChatGPT -4o April, 2025   
         elif choice == "2":
             breeds = get_all_breeds()
-            breed = input("Enter breed name: ").strip().lower()
+                      
+            try:
+                breed = input("Enter breed name: ").strip().lower()
+                if breed not in breeds:
+                    raise ValueError("Error: No such breed.")
+
+                print(get_random_image(breed))
+
+            except ValueError as ve:
+                print(ve)
             # TODO: Check if breed exists and fetch image
             # TODO: Print image URL or error message
+                
+
 
         elif choice == "3":
             breeds = get_all_breeds()
-            breed = input("Enter breed name: ").strip().lower()
+            try:
+                breed = input("Enter breed name: ").strip().lower()
+                if breed not in breeds:
+                    raise ValueError("Error: No such breed.")
+
+                sub_breed = input("Enter a sub-breed name: ").strip().lower()  
+                   
+                if sub_breed not in breeds[breed]:
+                    raise ValueError("Error: No such sub-breed or no sub-breeds for this breed.")
+                
+                print(get_random_sub_breed_image(breed, sub_breed))  
+
+            except ValueError as br:
+                print(br)
+
+            except ValueError as sb:
+                print(sb)    
+
+                # except ValueError: 
+                #     raise ValueError("Error: No such sub-breed.")
+                #     return True
+
             # TODO: Check if breed has sub-breeds
             # TODO: Ask for sub-breed, check if valid, then fetch image
             # TODO: Print image URL or error message
